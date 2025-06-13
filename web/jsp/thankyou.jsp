@@ -1,16 +1,26 @@
-<%@ page contentType="text/html; charset=iso-8859-1" language="java" import="java.sql.*" errorPage="" %>
+<%@ page contentType="text/html; charset=iso-8859-1" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page isELIgnored="false" %>
+
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Thank You</title>
-        <link rel="stylesheet" type="text/css" href="../css/style.css">
-    </head>
-    <body>
-        <h2>Thank You For Shopping at Bookstore</h2>
-        <hr>
-        <h3>Your credit card details are being validated</h3>
-        <% session.invalidate();%>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You</title>
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+</head>
+<body>
+    <h2>Thank You For Shopping at Bookstore</h2>
+    <hr>
+    <h3 style="text-align: center; margin-top: 30px;">
+    Your credit card details are being validated
+    </h3>
+
+    <c:if test="${not empty sessionScope}">
+        <c:remove var="cart" scope="session" />
+        <c:remove var="books" scope="session" />
+        <!-- Optionally remove other session attributes -->
+    </c:if>
+</body>
 </html>

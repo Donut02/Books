@@ -1,0 +1,42 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package dispatchers;
+
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import model.CartItem;
+
+/**
+ *
+ * @author dunca
+ */
+public class UpdateDispatcher implements Dispatcher{
+
+    public String execute(HttpServletRequest request, HttpServletResponse response) {
+        
+        HttpSession session = request.getSession(true);
+        Map<String, CartItem> cart = (Map<String, CartItem>) session.getAttribute("cart");
+
+        String[] booksToRemove = request.getParameterValues("remove");
+        if (booksToRemove != null) {
+            for (String bookToRemove : booksToRemove) {
+                cart.remove(bookToRemove);
+            }
+        }
+
+        for (Map.Entry<String, CartItem> entry : cart.entrySet()) {
+            String isbn = entry.getKey();
+            CartItem item = entry.getValue();
+            int quantity = Integer.parseInt(request.getParameter(isbn));
+            item.updateQuantity(quantity);
+        }
+
+        return "/jsp/cart.jsp";
+    }
+    
+}

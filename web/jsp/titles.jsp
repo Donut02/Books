@@ -1,96 +1,77 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Online Bookshop</title>
-        <link rel="stylesheet" type="text/css" href="css/style.css">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Bookshop</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
 
-    <body>
-        
-        <h1>Items in your Shopping Cart</h1>
+<body>
+    <jsp:include page = "header.jsp"/>
+    <h1>Items in your Shopping Cart</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+            </tr>
+        </thead>
+        <tbody>
+            <c:set var="cart" value="${sessionScope.cart}" />
+            <c:choose>
+                <c:when test="${not empty cart}">
+                    <c:set var="totalCost" value="0" scope="page" />
+                    <c:forEach var="entry" items="${cart}">
+                        <c:set var="item" value="${entry.value}" />
+                        <tr>
+                            <td><c:out value="${item}" /></td>
+                        </tr>
+                        <c:set var="totalCost" value="${totalCost + item.orderCost}" />
+                    </c:forEach>
+                    <tr>
+                        <td>
+                            Order Total: $
+                            <fmt:formatNumber value="${totalCost}" type="currency" currencySymbol="" minFractionDigits="2" />
+                        </td>
+                    </tr>
+                </c:when>
+                <c:otherwise>
+                    <tr>
+                        <td>No Items in Cart</td>
+                    </tr>
+                </c:otherwise>
+            </c:choose>
+        </tbody>
+    </table>
+
+    <hr>
+    <h2>Welcome to the Online Book Store</h2>
+    <form name="form1" method="post" action="./books">
+        <input type="hidden" name="action" value="add_to_cart" />
         <table>
             <thead>
                 <tr>
-                    <th>Item</th>
+                    <th>ISBN</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Add</th>
                 </tr>
             </thead>
             <tbody>
-                <%@ page import="model.*" %>
-                <%@ page import="java.util.*" %>
-                <%@ page import="java.text.*" %>
-                <%
-                    Map items = (Map) session.getAttribute("cart");
-                    if (items != null) {
-                        Set entries = items.entrySet();
-                        Iterator iter = entries.iterator();
-                        double totalCostOfOrder = 0.00;
-                        Book book = null;
-                        CartItem item = null;
-
-                        while (iter.hasNext()) {
-                            Map.Entry entry = (Map.Entry) iter.next();
-                            item = (CartItem) entry.getValue();
-                            double cost = item.getOrderCost();
-                            totalCostOfOrder += cost;
-                %>
-                <tr>
-                    <td><%= item%></td>
-                </tr>
-                <%
-                    } // end while
-                    DecimalFormat dollars = new DecimalFormat("0.00");
-                    String totalOrderInDollars = (dollars.format(totalCostOfOrder));
-
-                %>
-                <tr>
-                    <td>Order Total: $<%= totalOrderInDollars%></td>
-                </tr>
-                <%
-                } else {
-                %>
-                <tr>
-                    <td>No Items in Cart</td>
-                </tr>
-                <%
-                    } // end else
-                %>
-            </tbody>
-        </table>
-        <hr>
-        <h2>Welcome to the Online Book Store</h2>
-        <form name="form1" method="post" action="./books">
-            <input type="hidden" name="action" value="add_to_cart">
-            <table>
-                <thead>
+                <c:forEach var="book" items="${sessionScope.books}">
                     <tr>
-                        <th>ISBN</th>
-                        <th>Title</th>
-                        <th>Author</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Add</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <%
-                        List books = (List) session.getAttribute("books");
-                        Iterator iter = books.iterator();
-                        while (iter.hasNext()) {
-                            Book book = (Book) iter.next();
-                            String isbn = book.getIsbn();
-                            String title = book.getTitle();
-                            String author = book.getAuthor();
-                            String price = book.getDollarPrice();
-                    %>
-                    <tr>
-                        <td><%= isbn%></td>
-                        <td><%= title%></td>
-                        <td><%= author%></td>
-                        <td><%= price%></td>
+                        <td><c:out value="${book.isbn}" /></td>
+                        <td><c:out value="${book.title}" /></td>
+                        <td><c:out value="${book.author}" /></td>
+                        <td><c:out value="${book.dollarPrice}" /></td>
                         <td>
-                            <select name="<%= isbn%>" size="1">
+                            <select name="${book.isbn}" size="1">
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -98,22 +79,23 @@
                         </td>
                         <td>
                             <div align="center">
-                                <input type="checkbox" name="add" value="<%= isbn%>">
+                                <input type="checkbox" name="add" value="${book.isbn}" />
                             </div>
                         </td>
                     </tr>
-                    <% } // end while %>
-                    <tr>
-                        <td colspan="6">
-                            <input type="submit" name="Details" value="Add to Cart">
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </form>
-        <div class="link-container">
-            <p><a href="./books?action=view_cart">View Shopping Cart</a></p>
-        </div>
-        
-    </body>
+                </c:forEach>
+                <tr>
+                    <td colspan="6">
+                        <input type="submit" name="Details" value="Add to Cart" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+
+    <div class="link-container">
+        <p><a href="./books?action=view_cart">View Shopping Cart</a></p>
+    </div>
+    <jsp:include page = "footer.jsp"/>
+</body>
 </html>
